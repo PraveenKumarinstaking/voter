@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}{{ code }} - VoteFlow{% endblock %}
+{% block content %}
+<div class="text-center py-5">
+    {% if code == 404 %}
+        <i class="fa-solid fa-triangle-exclamation text-warning display-1 mb-4"></i>
+    {% else %}
+        <i class="fa-solid fa-circle-xmark text-danger display-1 mb-4"></i>
+    {% endif %}
+    <h2 class="text-white mb-3">{{ title }} ({{ code }})</h2>
+    <p class="text-secondary fs-5 mb-4">{{ message }}</p>
+    <a href="/" class="btn btn-gradient-primary px-4 py-2">
+        <i class="fa-solid fa-house me-2"></i>Return Home
+    </a>
+</div>
+{% endblock %}
