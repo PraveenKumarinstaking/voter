@@ -111,15 +111,7 @@
                                                     <span class="badge bg-dark border border-secondary">Completed</span>
                                                 {% endif %}
                                             </td>
-                                            <td class="text-secondary text-opacity-75 small">
-                                                {% if election.created_at %}
-                                                    {% if election.created_at.__class__.__name__ == 'datetime' %}
-                                                        {{ election.created_at.strftime('%Y-%m-%d %H:%M') }}
-                                                    {% else %}
-                                                        {{ election.created_at | string | truncate(16, True, '') }}
-                                                    {% endif %}
-                                                {% else %}N/A{% endif %}
-                                             </td>
+                                            <td class="text-secondary text-opacity-75 small">{{ election.created_at_str }}</td>
                                             <td class="text-end">
                                                 {% if election.status == 'upcoming' %}
                                                     <a href="{{ url_for('admin.change_election_status', election_id=election.id_str, status='active') }}" class="btn btn-success btn-sm me-1">
@@ -232,9 +224,7 @@
                                                     <span class="badge bg-warning-subtle text-warning border border-warning border-opacity-25 px-2">Pending</span>
                                                 {% endif %}
                                             </td>
-                                            <td class="text-secondary text-opacity-75 small">
-                                                {{ voter.created_at.strftime('%Y-%m-%d') if voter.created_at else 'N/A' }}
-                                            </td>
+                                            <td class="text-secondary text-opacity-75 small">{{ voter.created_at_str }}</td>
                                         </tr>
                                     {% endfor %}
                                 </tbody>

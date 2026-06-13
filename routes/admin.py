@@ -21,33 +21,66 @@ def admin_required(f):
 def dashboard():
     """Main dashboard displaying key statistics and managing election modules."""
     db = get_db()
-    
-    # Calculate counts
-    stats = {
-        'total_voters': db.voters.count_documents({}),
-        'total_candidates': db.candidates.count_documents({}),
-        'total_elections': db.elections.count_documents({}),
-        'total_votes': db.votes.count_documents({})
-    }
-    
-    # Get all elections, candidates, and voters
-    elections = list(db.elections.find().sort('created_at', -1))
-    candidates = list(db.candidates.find())
-    voters = list(db.voters.find().sort('created_at', -1))
-    
-    # Map candidates with election names
-    election_map = {str(e['_id']): e['title'] for e in elections}
-    for c in candidates:
-        c['id_str'] = str(c['_id'])
-        c['election_name'] = election_map.get(str(c['election_id']), 'Unknown Election')
-        
-    for e in elections:
-        e['id_str'] = str(e['_id'])
-        
-    for v in voters:
-        v['id_str'] = str(v['_id'])
 
-    return render_template('admin_dashboard.html', stats=stats, elections=elections, candidates=candidates, voters=voters)
+    # Calculate counts safely
+    try:
+        stats = {
+            'total_voters':     db.voters.count_documents({}),
+            'total_candidates': db.candidates.count_documents({}),
+            'total_elections':  db.elections.count_documents({}),
+            'total_votes':      db.votes.count_documents({}),
+        }
+    except Exception:
+        stats = {'total_voters': 0, 'total_candidates': 0, 'total_elections': 0, 'total_votes': 0}
+
+    # Fetch data
+    try:
+        elections  = list(db.elections.find().sort('created_at', -1))
+    except Exception:
+        elections = []
+    try:
+        candidates = list(db.candidates.find())
+    except Exception:
+        candidates = []
+    try:
+        voters     = list(db.voters.find().sort('created_at', -1))
+    except Exception:
+        voters = []
+
+    # ── Normalise created_at to a plain string in Python (safe for any DB backend) ──
+    def _fmt_date(val, fmt='%Y-%m-%d %H:%M'):
+        """Return a formatted date string regardless of whether val is datetime or str."""
+        if val is None:
+            return 'N/A'
+        if isinstance(val, datetime):
+            return val.strftime(fmt)
+        s = str(val)
+        return s[:16] if len(s) >= 16 else s  # ISO string slice "2026-06-13T11:14"
+
+    # Enrich elections
+    election_map = {str(e['_id']): e['title'] for e in elections}
+    for e in elections:
+        e['id_str']     = str(e['_id'])
+        e['created_at_str'] = _fmt_date(e.get('created_at'))
+
+    # Enrich candidates
+    for c in candidates:
+        c['id_str']       = str(c['_id'])
+        c['election_name'] = election_map.get(str(c.get('election_id', '')), 'Unknown Election')
+
+    # Enrich voters
+    for v in voters:
+        v['id_str']         = str(v['_id'])
+        v['created_at_str'] = _fmt_date(v.get('created_at'), '%Y-%m-%d')
+
+    return render_template(
+        'admin_dashboard.html',
+        stats=stats,
+        elections=elections,
+        candidates=candidates,
+        voters=voters,
+    )
+
 
 @admin_bp.route('/election/create', methods=['POST'])
 @admin_required
