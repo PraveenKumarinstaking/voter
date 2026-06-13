@@ -1,10 +1,15 @@
 import sys
 import os
 
-# Add parent directory to path so Flask app modules can be found
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# CRITICAL: Ensure the project root is on Python's module search path
+# so that 'from app import app', 'from database.mongodb import ...', etc. all resolve
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
 
-from app import app
+# Set PYTHONPATH fallback explicitly
+os.environ.setdefault("PYTHONPATH", project_root)
 
-# Vercel expects a callable named 'app' or 'handler'
-# This file is the serverless function entry point
+# Import the Flask application object
+# Vercel's Python runtime looks for a callable named 'app' in this file
+from app import app  # noqa: F401

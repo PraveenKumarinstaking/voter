@@ -1,12 +1,23 @@
 import os
 import json
+import tempfile
 from datetime import datetime
 # pyrefly: ignore [missing-import]
 from bson.objectid import ObjectId
 # pyrefly: ignore [missing-import]
 from pymongo import MongoClient
 # pyrefly: ignore [missing-import]
+from pymongo.errors import DuplicateKeyError
+# pyrefly: ignore [missing-import]
 from werkzeug.security import generate_password_hash
+
+# Detect Vercel serverless environment (read-only filesystem except /tmp)
+IS_VERCEL = os.environ.get('VERCEL') == '1' or os.environ.get('VERCEL_ENV') is not None
+
+class SupabaseTableNotFoundError(RuntimeError):
+    """Raised when a Supabase table does not exist yet (setup_supabase.sql not run)."""
+    pass
+
 
 # Global database client and database references
 client = None
@@ -44,19 +55,47 @@ class MockCollection:
         self.name = name
         self.file_path = file_path
         
-    def _load_data(self):
-        if os.path.exists(self.file_path):
-            try:
-                with open(self.file_path, 'r', encoding='utf-8') as f:
-                    full_data = json.load(f)
-                    return full_data.get(self.name, [])
-            except Exception:
-                return []
-        return []
+    def _load_data_original(self):
+        # Kept for reference — actual _load_data is defined below _get_writable_path
+        pass
         
+    def _get_writable_path(self):
+        """On Vercel/serverless, use /tmp for writes since the rest is read-only."""
+        if IS_VERCEL:
+            tmp_path = os.path.join(tempfile.gettempdir(), 'mock_db.json')
+            # Copy original data to /tmp on first access
+            if not os.path.exists(tmp_path) and os.path.exists(self.file_path):
+                try:
+                    import shutil
+                    shutil.copy2(self.file_path, tmp_path)
+                except Exception:
+                    pass
+            return tmp_path
+        return self.file_path
+
+    def _load_data(self):
+        read_path = self._get_writable_path() if IS_VERCEL else self.file_path
+        # Try writable path first, fall back to original
+        for path in ([read_path, self.file_path] if IS_VERCEL else [self.file_path]):
+            if os.path.exists(path):
+                try:
+                    with open(path, 'r', encoding='utf-8') as f:
+                        full_data = json.load(f)
+                        return full_data.get(self.name, [])
+                except Exception:
+                    continue
+        return []
+
     def _save_data(self, data):
+        write_path = self._get_writable_path()
         full_data = {}
-        if os.path.exists(self.file_path):
+        if os.path.exists(write_path):
+            try:
+                with open(write_path, 'r', encoding='utf-8') as f:
+                    full_data = json.load(f)
+            except Exception:
+                pass
+        elif os.path.exists(self.file_path):
             try:
                 with open(self.file_path, 'r', encoding='utf-8') as f:
                     full_data = json.load(f)
@@ -75,10 +114,10 @@ class MockCollection:
             
         full_data[self.name] = serialize(data)
         try:
-            with open(self.file_path, 'w', encoding='utf-8') as f:
+            with open(write_path, 'w', encoding='utf-8') as f:
                 json.dump(full_data, f, indent=4)
         except Exception as e:
-            print(f"[MOCK DB ERROR] Saving data: {e}")
+            print(f"[MOCK DB ERROR] Saving data to {write_path}: {e}")
 
     def find_one(self, filter_dict):
         docs = self._load_data()
@@ -287,22 +326,30 @@ class SupabaseCollection:
     def find_one(self, filter_dict):
         params = self._build_params(filter_dict)
         params["limit"] = 1
-        res = requests.get(f"{self.url}/rest/v1/{self.name}", headers=self.headers, params=params)
+        try:
+            res = requests.get(f"{self.url}/rest/v1/{self.name}", headers=self.headers, params=params, timeout=10)
+        except Exception as e:
+            print(f"[SUPABASE ERROR] Network error in find_one: {e}")
+            return None
         if res.status_code >= 400:
             print(f"[SUPABASE ERROR] {res.status_code}: {res.text}")
-            if res.status_code == 404:
-                raise RuntimeError(f"Table '{self.name}' not found on Supabase. Please execute setup_supabase.sql script in the Supabase SQL editor.")
+            if res.status_code in (404, 400) and ("PGRST" in res.text or "not found" in res.text.lower()):
+                raise SupabaseTableNotFoundError(f"Table '{self.name}' not found. Run setup_supabase.sql in Supabase SQL Editor.")
             return None
         data = res.json()
         return self._deserialize_doc(data[0]) if data else None
 
     def find(self, filter_dict=None):
         params = self._build_params(filter_dict)
-        res = requests.get(f"{self.url}/rest/v1/{self.name}", headers=self.headers, params=params)
+        try:
+            res = requests.get(f"{self.url}/rest/v1/{self.name}", headers=self.headers, params=params, timeout=10)
+        except Exception as e:
+            print(f"[SUPABASE ERROR] Network error in find: {e}")
+            return SupabaseCursor([])
         if res.status_code >= 400:
             print(f"[SUPABASE ERROR] {res.status_code}: {res.text}")
-            if res.status_code == 404:
-                raise RuntimeError(f"Table '{self.name}' not found on Supabase. Please execute setup_supabase.sql script in the Supabase SQL editor.")
+            if res.status_code in (404, 400) and ("PGRST" in res.text or "not found" in res.text.lower()):
+                raise SupabaseTableNotFoundError(f"Table '{self.name}' not found. Run setup_supabase.sql in Supabase SQL Editor.")
             return SupabaseCursor([])
         data = res.json()
         return SupabaseCursor(self._deserialize_doc(data))
@@ -311,17 +358,18 @@ class SupabaseCollection:
         doc = self._serialize(doc)
         if '_id' not in doc:
             doc['_id'] = str(ObjectId())
-            
-        res = requests.post(f"{self.url}/rest/v1/{self.name}", headers=self.headers, json=doc)
-        
+        try:
+            res = requests.post(f"{self.url}/rest/v1/{self.name}", headers=self.headers, json=doc, timeout=10)
+        except Exception as e:
+            print(f"[SUPABASE ERROR] Network error in insert_one: {e}")
+            raise RuntimeError(f"Supabase network error: {e}")
         if res.status_code == 409 or (res.status_code >= 400 and "23505" in res.text):
             raise DuplicateKeyError("Duplicate key violation on Supabase.")
         elif res.status_code >= 400:
             print(f"[SUPABASE ERROR] {res.status_code}: {res.text}")
-            if res.status_code == 404:
-                raise RuntimeError(f"Table '{self.name}' not found on Supabase. Please execute setup_supabase.sql script in the Supabase SQL editor.")
+            if res.status_code in (404, 400) and ("PGRST" in res.text or "not found" in res.text.lower()):
+                raise SupabaseTableNotFoundError(f"Table '{self.name}' not found. Run setup_supabase.sql in Supabase SQL Editor.")
             raise RuntimeError(f"Supabase insert failed: {res.text}")
-            
         return type('InsertOneResult', (object,), {'inserted_id': doc['_id']})()
 
     def insert_many(self, docs_list):
@@ -331,31 +379,37 @@ class SupabaseCollection:
             if '_id' not in doc:
                 doc['_id'] = str(ObjectId())
             serialized_docs.append(doc)
-            
-        res = requests.post(f"{self.url}/rest/v1/{self.name}", headers=self.headers, json=serialized_docs)
+        try:
+            res = requests.post(f"{self.url}/rest/v1/{self.name}", headers=self.headers, json=serialized_docs, timeout=15)
+        except Exception as e:
+            raise RuntimeError(f"Supabase network error: {e}")
         if res.status_code >= 400:
             print(f"[SUPABASE ERROR] {res.status_code}: {res.text}")
-            if res.status_code == 404:
-                raise RuntimeError(f"Table '{self.name}' not found on Supabase. Please execute setup_supabase.sql script in the Supabase SQL editor.")
+            if res.status_code in (404, 400) and ("PGRST" in res.text or "not found" in res.text.lower()):
+                raise SupabaseTableNotFoundError(f"Table '{self.name}' not found. Run setup_supabase.sql in Supabase SQL Editor.")
             raise RuntimeError(f"Supabase insert_many failed: {res.text}")
 
     def update_one(self, filter_dict, update_dict):
         params = self._build_params(filter_dict)
         if '$set' in update_dict:
             payload = self._serialize(update_dict['$set'])
-            res = requests.patch(f"{self.url}/rest/v1/{self.name}", headers=self.headers, params=params, json=payload)
+            try:
+                res = requests.patch(f"{self.url}/rest/v1/{self.name}", headers=self.headers, params=params, json=payload, timeout=10)
+            except Exception as e:
+                print(f"[SUPABASE ERROR] Network error in update_one: {e}")
+                return
             if res.status_code >= 400:
                 print(f"[SUPABASE ERROR] {res.status_code}: {res.text}")
-                if res.status_code == 404:
-                    raise RuntimeError(f"Table '{self.name}' not found on Supabase. Please execute setup_supabase.sql script in the Supabase SQL editor.")
 
     def delete_one(self, filter_dict):
         params = self._build_params(filter_dict)
-        res = requests.delete(f"{self.url}/rest/v1/{self.name}", headers=self.headers, params=params)
+        try:
+            res = requests.delete(f"{self.url}/rest/v1/{self.name}", headers=self.headers, params=params, timeout=10)
+        except Exception as e:
+            print(f"[SUPABASE ERROR] Network error in delete_one: {e}")
+            return
         if res.status_code >= 400:
             print(f"[SUPABASE ERROR] {res.status_code}: {res.text}")
-            if res.status_code == 404:
-                raise RuntimeError(f"Table '{self.name}' not found on Supabase. Please execute setup_supabase.sql script in the Supabase SQL editor.")
 
     def count_documents(self, filter_dict):
         return len(self.find(filter_dict))
@@ -400,19 +454,47 @@ def init_db(app):
                 print("[DATABASE] Seeded default administrator account successfully in Supabase.")
             db = temp_db
             return db
+        except SupabaseTableNotFoundError as e:
+            print("\n" + "="*70)
+            print("[DATABASE ERROR] Supabase tables not found.")
+            print(f"Details: {e}")
+            print("ACTION REQUIRED: Run setup_supabase.sql in the Supabase SQL Editor.")
+            print("Falling back to MongoDB or MockDatabase...")
+            print("="*70 + "\n")
         except Exception as e:
             print("\n" + "="*70)
             print("[DATABASE WARNING] Could not verify Supabase connection.")
             print(f"Details: {e}")
-            print("Please ensure your setup_supabase.sql has been run in the Supabase SQL editor.")
             print("Falling back to MongoDB...")
             print("="*70 + "\n")
         
     mongo_uri = app.config.get("MONGO_URI", "mongodb://localhost:27017/online_voting_system")
     
+    # On Vercel without Supabase tables set up, use MockDatabase
+    # (MongoDB Atlas would be needed for persistent data on Vercel)
+    if IS_VERCEL and (not mongo_uri or 'localhost' in mongo_uri):
+        print("[DATABASE] Vercel environment detected with no remote database. Using in-memory MockDatabase.")
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        mock_file = os.path.join(base_dir, 'mock_db.json')
+        db = MockDatabase(mock_file)
+        if db.admins.count_documents({}) == 0:
+            admin_data = {
+                "username": "admin",
+                "password": generate_password_hash("AdminPassword123")
+            }
+            db.admins.insert_one(admin_data)
+            print("[DATABASE] Seeded default administrator in MockDatabase.")
+        return db
+    
     try:
-        # Try actual MongoDB connection with short timeout
-        client = MongoClient(mongo_uri, serverSelectionTimeoutMS=1500)
+        # Try actual MongoDB connection — tuned timeouts for serverless cold starts
+        # Note: mongodb+srv:// URIs handle TLS automatically, no extra param needed
+        client = MongoClient(
+            mongo_uri,
+            serverSelectionTimeoutMS=5000,
+            connectTimeoutMS=5000,
+            socketTimeoutMS=10000
+        )
         client.admin.command('ping')
         
         # Connection succeeded
