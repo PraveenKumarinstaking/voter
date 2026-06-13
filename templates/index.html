@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+
+{% block title %}VoteFlow - Secure & Audit-Ready Digital Ballot Box{% endblock %}
+
+{% block content %}
+<!-- Decorative Background Blobs -->
+<div class="hero-glow-blob" style="top: 15%; left: 5%;"></div>
+<div class="hero-glow-blob" style="top: 40%; right: 5%; width: 400px; height: 400px;"></div>
+
+<!-- 1. Hero Section -->
+<div class="row align-items-center py-5 position-relative">
+    <div class="col-lg-6 text-center text-lg-start mb-5 mb-lg-0">
+        <div class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-2 rounded-pill mb-3">
+            <i class="fa-solid fa-shield-halved me-1"></i> Cryptographically Authenticated
+        </div>
+        <h1 class="display-3 mb-3 text-white fw-extrabold leading-tight">
+            Secure, Transparent <br>
+            <span class="hero-gradient-text">Democracy at Scale</span>
+        </h1>
+        <p class="lead text-secondary mb-4 fs-5" style="max-width: 520px; line-height: 1.6;">
+            Cast your ballot safely and instantly in the next generation digital voting ecosystem. Backed by MongoDB integrity controls, session tokens, and automated tally audit sheets.
+        </p>
+        <div class="d-flex flex-wrap justify-content-center justify-content-lg-start gap-3">
+            {% if session.get('role') == 'voter' %}
+                <a href="{{ url_for('voting.dashboard') }}" class="btn btn-gradient-primary btn-lg px-4 py-3">
+                    <i class="fa-solid fa-gauge-high me-2"></i> Access Voter Portal
+                </a>
+            {% elif session.get('role') == 'admin' %}
+                <a href="{{ url_for('admin.dashboard') }}" class="btn btn-gradient-primary btn-lg px-4 py-3">
+                    <i class="fa-solid fa-gauge-high me-2"></i> Go to Admin Dashboard
+                </a>
+            {% else %}
+                <a href="{{ url_for('auth.login') }}" class="btn btn-gradient-primary btn-lg px-4 py-3">
+                    <i class="fa-solid fa-right-to-bracket me-2"></i> Access Ballot Box
+                </a>
+                <a href="{{ url_for('auth.register') }}" class="btn btn-outline-custom btn-lg px-4 py-3">
+                    <i class="fa-solid fa-user-plus me-2"></i> Register to Vote
+                </a>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Hero Mockup Panel -->
+    <div class="col-lg-6">
+        <div class="glass-panel p-4 p-md-5 position-relative overflow-hidden animated-float border border-secondary border-opacity-25">
+            <div class="position-absolute top-0 start-0 w-100 h-100 bg-gradient-glow opacity-5"></div>
+            
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <span class="text-white fw-bold"><i class="fa-solid fa-circle-check text-success me-2"></i>Active Ballots</span>
+                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">
+                    <i class="fa-solid fa-spinner fa-spin me-1"></i> Ledger Syncing
+                </span>
+            </div>
+            
+            <div class="border border-secondary border-opacity-20 rounded p-3 mb-4 bg-dark bg-opacity-20">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-secondary small">Electoral Assembly</span>
+                    <span class="badge bg-primary text-white">Live</span>
+                </div>
+                <h5 class="text-white mb-0">2026 Student Council Election</h5>
+            </div>
+            
+            <!-- Mock Candidate 1 -->
+            <div class="mock-ballot active d-flex justify-content-between align-items-center mb-3">
+                <div class="d-flex align-items-center">
+                    <div class="bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded p-2 me-3 text-center" style="width: 40px;">
+                        <strong>A</strong>
+                    </div>
+                    <div>
+                        <h6 class="text-white mb-0">Alice Smith</h6>
+                        <small class="text-secondary">Innovation Alliance</small>
+                    </div>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-primary text-white">54% Votes</span>
+                </div>
+            </div>
+            
+            <!-- Mock Candidate 2 -->
+            <div class="mock-ballot d-flex justify-content-between align-items-center mb-3">
+                <div class="d-flex align-items-center">
+                    <div class="bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded p-2 me-3 text-center" style="width: 40px;">
+                        <strong>B</strong>
+                    </div>
+                    <div>
+                        <h6 class="text-white mb-0">Bob Jones</h6>
+                        <small class="text-secondary">Student Voice Party</small>
+                    </div>
+                </div>
+                <div class="text-end">
+                    <span class="text-secondary small">46% Votes</span>
+                </div>
+            </div>
+            
+            <div class="mt-4 pt-2 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center text-secondary small">
+                <span><i class="fa-solid fa-lock text-info me-1"></i> SHA-256 Encrypted</span>
+                <span>Tally Update: Just Now</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 2. Dynamic Live Statistics Strip -->
+<div class="row my-5">
+    <div class="col-12">
+        <div class="glass-panel p-4 bg-dark bg-opacity-40 border border-secondary border-opacity-20">
+            <div class="row text-center g-4">
+                <div class="col-md-4">
+                    <div class="p-2">
+                        <h2 class="text-white display-6 fw-bold mb-1">{{ stats.total_voters }}</h2>
+                        <span class="text-secondary text-uppercase small tracking-wide"><i class="fa-solid fa-users text-primary me-2"></i>Verified Voters</span>
+                    </div>
+                </div>
+                <div class="col-md-4 border-start border-end border-secondary border-opacity-25">
+                    <div class="p-2">
+                        <h2 class="text-white display-6 fw-bold mb-1">{{ stats.total_votes }}</h2>
+                        <span class="text-secondary text-uppercase small tracking-wide"><i class="fa-solid fa-box-archive text-success me-2"></i>Ballots Cast</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-2">
+                        <h2 class="text-white display-6 fw-bold mb-1">{{ stats.active_elections + stats.completed_elections }}</h2>
+                        <span class="text-secondary text-uppercase small tracking-wide"><i class="fa-solid fa-square-poll-horizontal text-info me-2"></i>Events Conducted</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 3. Key Core Pillars -->
+<div class="row my-5 pt-4 g-4 justify-content-center">
+    <div class="col-lg-8 text-center mb-4">
+        <h2 class="text-white display-5">Enterprise Trust Framework</h2>
+        <p class="text-secondary">Designed with mathematical security checks and sleek glassmorphic UI aesthetics.</p>
+    </div>
+    
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="glass-panel p-4 h-100 glow-card border border-secondary border-opacity-20">
+                <div class="stat-icon mb-3"><i class="fa-solid fa-key text-primary"></i></div>
+                <h4 class="text-white mb-2">Cryptographic Keys</h4>
+                <p class="text-secondary mb-0">Every voter credential is passcoded and protected using bcrypt. Session payloads are securely signed with isolated server-side signatures.</p>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="glass-panel p-4 h-100 glow-card border border-secondary border-opacity-20">
+                <div class="stat-icon mb-3"><i class="fa-solid fa-fingerprint text-success"></i></div>
+                <h4 class="text-white mb-2">Double-Voting Shield</h4>
+                <p class="text-secondary mb-0">MongoDB database compound unique indexes strictly enforce a one-ballot-per-voter limit on each election, ensuring structural voting integrity.</p>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="glass-panel p-4 h-100 glow-card border border-secondary border-opacity-20">
+                <div class="stat-icon mb-3"><i class="fa-solid fa-check-double text-info"></i></div>
+                <h4 class="text-white mb-2">Verifiable Audits</h4>
+                <p class="text-secondary mb-0">Completed results are instantly aggregated by candidates. Administrators can toggle results publication, exposing exact breakdowns to voters.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 4. How It Works (Timeline Roadmap) -->
+<div class="row my-5 py-5 bg-dark bg-opacity-20 rounded-4 border border-secondary border-opacity-10 align-items-center">
+    <div class="col-12 text-center mb-5">
+        <h2 class="text-white display-5">Electoral Process Roadmap</h2>
+        <p class="text-secondary">Follow these simple steps to express your voice in a matter of seconds.</p>
+    </div>
+    
+    <div class="col-12">
+        <div class="row timeline-track g-4 text-center">
+            <div class="col-md-3">
+                <div class="timeline-node"><i class="fa-solid fa-user-pen"></i></div>
+                <h5 class="text-white">1. Sign Up</h5>
+                <p class="text-secondary small px-3">Create your voter profile using a unique Email and Voter registration ID.</p>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="timeline-node"><i class="fa-solid fa-user-shield"></i></div>
+                <h5 class="text-white">2. Authenticate</h5>
+                <p class="text-secondary small px-3">Log in through the secure portal. Role tokens ensure isolated portal layouts.</p>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="timeline-node"><i class="fa-solid fa-check-to-slot"></i></div>
+                <h5 class="text-white">3. Drop Ballot</h5>
+                <p class="text-secondary small px-3">Review running candidates, make your choice, and drop your digital ballot paper.</p>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="timeline-node"><i class="fa-solid fa-chart-line"></i></div>
+                <h5 class="text-white">4. View Audit</h5>
+                <p class="text-secondary small px-3">Once polls close, track published, audit-ready breakdowns with beautiful tallies.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 5. Interactive FAQ Accordion -->
+<div class="row my-5 justify-content-center">
+    <div class="col-lg-8">
+        <h3 class="text-white text-center mb-4"><i class="fa-solid fa-circle-question text-primary me-2"></i>Frequently Asked Questions</h3>
+        
+        <div class="accordion accordion-custom" id="faqAccordion">
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingOne">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                        How does the system ensure I only vote once?
+                    </button>
+                </h2>
+                <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                        The backend configures a strict MongoDB compound unique index constraints on voter and election identifiers (`{voter_id: 1, election_id: 1}`). Any subsequent vote attempt triggers a database block, raising a `DuplicateKeyError` and preventing duplicates at the structural database level.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingTwo">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                        Can anyone see who I voted for?
+                    </h2>
+                </h2>
+                <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                        No. Vote transactions are verified securely via session contexts, but the UI tallies results collectively. Individual choices are isolated, ensuring ballot confidentiality remains intact.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingThree">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                        When do election results become viewable?
+                    </h2>
+                </h2>
+                <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                        When an election is active, tallies are locked. Once the admin marks the election status as completed, they can click "Publish" on their dashboard, enabling voters to see a real-time progress-bar results summary.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

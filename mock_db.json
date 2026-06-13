@@ -1,0 +1,87 @@
+{
+    "voters": [
+        {
+            "_id": "6a2cee2fcc874c420e568ded",
+            "name": "Sarah Connor",
+            "email": "sarah@example.com",
+            "voter_id": "VOTE-111111",
+            "password": "scrypt:32768:8:1$uW4AYDYLF6lRBLme$3a75f9b7ab797a63d952ae8e18a8c1fd7fbc761cc845f788b4eb8a84a5a143bb7dd0c697c0df89d54b6129311be37ae83ab783b45ffbf248866298dadaa1e5c1",
+            "is_approved": true,
+            "created_at": "2026-06-13T11:14:15.555740"
+        },
+        {
+            "_id": "6a2cee2fcc874c420e568dee",
+            "name": "John Connor",
+            "email": "john@example.com",
+            "voter_id": "VOTE-222222",
+            "password": "scrypt:32768:8:1$idScoVQF09f7W612$378b113f8000ad5d36f2aa3aa3b199c47465960f8df322f6deed6283a0b8693e2c82a9d4b04c8cd73d23efe4c4d05cf6123fa9edb9cc622da0883530a2160c36",
+            "is_approved": true,
+            "created_at": "2026-06-13T11:14:15.724334"
+        },
+        {
+            "name": "praveenkumar n",
+            "email": "lv5251071@gmail.com",
+            "voter_id": "MJGVA2357FSV",
+            "password": "scrypt:32768:8:1$ZlVn5vAsLPioNJiL$3eb20d781bdcb430ce42bddb837177e0f3c348ded046c744f4cadd0e0cf47ed6ee96804a352e36127089bd635f97761875b1d5ab147c2adb329b78843358d4e5",
+            "is_approved": true,
+            "_id": "6a2ceef7d3616cc16f68416e"
+        },
+        {
+            "name": "Sarah Connor Two",
+            "email": "sarah2@example.com",
+            "voter_id": "VOTE-333333",
+            "password": "scrypt:32768:8:1$zg35chn5raU1wIXn$09bb45a079566ccdc8c39725724ce54fb5292ccffb3f12d6b096030e21ff37c0ccd17643a314b91ad53cfe9b91712cd8538d4ac3222629d606856239e49438c2",
+            "is_approved": true,
+            "created_at": "2026-06-13T11:25:33.731226",
+            "_id": "6a2cf0d5991dc216b4690f9d"
+        }
+    ],
+    "elections": [
+        {
+            "_id": "6a2cee2fcc874c420e568def",
+            "title": "2026 Student Council Election",
+            "description": "Vote for the upcoming Student Council President to lead academic initiatives and student representation.",
+            "status": "active",
+            "created_at": "2026-06-13T11:14:15.727526"
+        },
+        {
+            "_id": "6a2cee2fcc874c420e568df0",
+            "title": "Municipal Board Elections",
+            "description": "Select representatives for the Municipal Development Council.",
+            "status": "upcoming",
+            "created_at": "2026-06-13T11:14:15.727538"
+        }
+    ],
+    "candidates": [
+        {
+            "_id": "6a2cee2fcc874c420e568df1",
+            "name": "Alice Smith",
+            "party": "Innovation Alliance",
+            "bio": "Alice is a senior majoring in Computer Science. She aims to improve digital campus tools and extend library hours.",
+            "election_id": "6a2cee2fcc874c420e568def"
+        },
+        {
+            "_id": "6a2cee2fcc874c420e568df2",
+            "name": "Bob Jones",
+            "party": "Student Voice Party",
+            "bio": "Bob is a junior majoring in Political Science. He is focused on campus sustainability, reducing food waste, and transit aid.",
+            "election_id": "6a2cee2fcc874c420e568def"
+        }
+    ],
+    "admins": [
+        {
+            "username": "admin",
+            "password": "scrypt:32768:8:1$KDaKrHND24cjN6Af$b96a989f5c511507077bec5325226330f978499ff14798e80ae5edfbace6a81761548fe65c07dc0f5a5215914bb350e54404cea6927a093d6e27afb33817820e",
+            "_id": "6a2cee65ef29990b05a9c375"
+        }
+    ],
+    "votes": [
+        {
+            "voter_id": "6a2cf0d5991dc216b4690f9d",
+            "election_id": "6a2cee2fcc874c420e568def",
+            "candidate_id": "6a2cee2fcc874c420e568df1",
+            "timestamp": "2026-06-13T11:25:59.490214",
+            "_id": "6a2cf0ef991dc216b4690f9e"
+        }
+    ]
+}

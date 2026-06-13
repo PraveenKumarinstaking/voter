@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Voter Registration - VoteFlow{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+    <div class="col-md-8 col-lg-6">
+        <div class="glass-panel p-4 p-md-5 border border-secondary border-opacity-25 shadow">
+            
+            <div class="text-center mb-4">
+                <i class="fa-solid fa-address-card text-primary fs-1 mb-2"></i>
+                <h2 class="text-white">Voter Registration</h2>
+                <p class="text-secondary small">Register your unique profile to participate in active ballots</p>
+            </div>
+
+            <form action="{{ url_for('auth.register') }}" method="POST" onsubmit="return validateForm()">
+                <!-- Name -->
+                <div class="mb-3">
+                    <label for="name" class="form-label text-secondary small">Full Legal Name</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-dark border-secondary border-opacity-25 text-secondary">
+                            <i class="fa-solid fa-signature"></i>
+                        </span>
+                        <input type="text" class="form-control form-control-custom" id="name" name="name" placeholder="John Doe" required>
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="mb-3">
+                    <label for="email" class="form-label text-secondary small">Email Address</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-dark border-secondary border-opacity-25 text-secondary">
+                            <i class="fa-solid fa-envelope"></i>
+                        </span>
+                        <input type="email" class="form-control form-control-custom" id="email" name="email" placeholder="john@example.com" required>
+                    </div>
+                    <div class="form-text text-secondary text-opacity-50 fs-7">Used for verification and session login.</div>
+                </div>
+
+                <!-- Voter ID -->
+                <div class="mb-3">
+                    <label for="voter_id" class="form-label text-secondary small">Government / Voter Registration Card ID</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-dark border-secondary border-opacity-25 text-secondary">
+                            <i class="fa-solid fa-id-card"></i>
+                        </span>
+                        <input type="text" class="form-control form-control-custom" id="voter_id" name="voter_id" placeholder="e.g. VOTE-998877" required>
+                    </div>
+                    <div class="form-text text-secondary text-opacity-50 fs-7">Your unique ID issued by the electoral board. Must be unique.</div>
+                </div>
+
+                <!-- Password -->
+                <div class="row mb-3">
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        <label for="password" class="form-label text-secondary small">Security Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-secondary border-opacity-25 text-secondary">
+                                <i class="fa-solid fa-lock"></i>
+                            </span>
+                            <input type="password" class="form-control form-control-custom" id="password" name="password" placeholder="••••••••" required minlength="6">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="confirm_password" class="form-label text-secondary small">Confirm Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-secondary border-opacity-25 text-secondary">
+                                <i class="fa-solid fa-shield-halved"></i>
+                            </span>
+                            <input type="password" class="form-control form-control-custom" id="confirm_password" name="confirm_password" placeholder="••••••••" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Terms and Submission -->
+                <div class="form-check mb-4">
+                    <input class="form-check-input bg-dark border-secondary border-opacity-25" type="checkbox" id="terms" required>
+                    <label class="form-check-label text-secondary small" for="terms">
+                        I verify that the legal name and Voter ID provided are accurate and belong to me.
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-gradient-primary w-100 py-2 fs-6">
+                    <i class="fa-solid fa-user-plus me-1"></i> Register Account
+                </button>
+            </form>
+
+            <div class="text-center mt-4">
+                <p class="text-secondary small mb-0">
+                    Already registered? <a href="{{ url_for('auth.login') }}" class="text-info text-decoration-none">Log in here</a>
+                </p>
+            </div>
+            
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function validateForm() {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm_password').value;
+
+        if (password !== confirmPassword) {
+            alert("Error: Passwords do not match. Please verify your entries.");
+            return false;
+        }
+        return true;
+    }
+</script>
+{% endblock %}

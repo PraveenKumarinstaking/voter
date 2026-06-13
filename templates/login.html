@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In - VoteFlow{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-5">
+    <div class="col-md-6 col-lg-5">
+        <div class="glass-panel p-4 p-md-5 border border-secondary border-opacity-25 shadow">
+            
+            <div class="text-center mb-4">
+                <i class="fa-solid fa-lock-open text-primary fs-1 mb-2"></i>
+                <h2 class="text-white">Access Portal</h2>
+                <p class="text-secondary small">Please select authorization level below</p>
+            </div>
+
+            <!-- Custom Unified Tab Selector -->
+            <ul class="nav nav-pills nav-justified mb-4 p-1 rounded bg-dark bg-opacity-40" id="loginTab" role="tablist" style="border: 1px solid rgba(255,255,255,0.05);">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active text-white py-2" id="voter-tab" data-bs-toggle="tab" data-bs-target="#voter-pane" type="button" role="tab" aria-controls="voter-pane" aria-selected="true" onclick="setLoginType('voter')">
+                        <i class="fa-solid fa-user me-1"></i> Voter
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link text-white py-2" id="admin-tab" data-bs-toggle="tab" data-bs-target="#admin-pane" type="button" role="tab" aria-controls="admin-pane" aria-selected="false" onclick="setLoginType('admin')">
+                        <i class="fa-solid fa-user-gear me-1"></i> Admin
+                    </button>
+                </li>
+            </ul>
+
+            <form action="{{ url_for('auth.login') }}" method="POST" id="loginForm">
+                <!-- Hidden input to pass selected portal -->
+                <input type="hidden" name="login_type" id="login_type" value="voter">
+
+                <!-- Input group 1: Username / Email -->
+                <div class="mb-3">
+                    <label for="username_or_email" class="form-label text-secondary small" id="usernameLabel">Voter Email / Voter ID</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-dark border-secondary border-opacity-25 text-secondary">
+                            <i class="fa-solid fa-envelope" id="inputIcon"></i>
+                        </span>
+                        <input type="text" class="form-control form-control-custom" id="username_or_email" name="username_or_email" placeholder="voter@example.com or ID number" required>
+                    </div>
+                </div>
+
+                <!-- Input group 2: Password -->
+                <div class="mb-4">
+                    <label for="password" class="form-label text-secondary small">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-dark border-secondary border-opacity-25 text-secondary">
+                            <i class="fa-solid fa-key"></i>
+                        </span>
+                        <input type="password" class="form-control form-control-custom" id="password" name="password" placeholder="••••••••" required>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-gradient-primary w-100 py-2 fs-6">
+                    <i class="fa-solid fa-right-to-bracket me-1"></i> Sign In
+                </button>
+            </form>
+
+            <div class="text-center mt-4">
+                <p class="text-secondary small mb-0" id="signupPrompt">
+                    New voter? <a href="{{ url_for('auth.register') }}" class="text-info text-decoration-none">Create an account</a>
+                </p>
+            </div>
+            
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function setLoginType(type) {
+        document.getElementById('login_type').value = type;
+        const label = document.getElementById('usernameLabel');
+        const icon = document.getElementById('inputIcon');
+        const input = document.getElementById('username_or_email');
+        const signupPrompt = document.getElementById('signupPrompt');
+
+        if (type === 'admin') {
+            label.textContent = "Administrator Username";
+            input.placeholder = "Enter admin username";
+            icon.className = "fa-solid fa-user-shield";
+            signupPrompt.style.display = 'none';
+        } else {
+            label.textContent = "Voter Email / Voter ID";
+            input.placeholder = "voter@example.com or ID number";
+            icon.className = "fa-solid fa-envelope";
+            signupPrompt.style.display = 'block';
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,335 @@
+/* Google Fonts import */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --bg-primary: #0b0f19;
+    --bg-secondary: #111827;
+    --card-bg: rgba(17, 24, 39, 0.75);
+    --border-color: rgba(255, 255, 255, 0.08);
+    --text-primary: #f3f4f6;
+    --text-secondary: #9ca3af;
+    
+    /* Elegant gradients */
+    --accent-blue: #3b82f6;
+    --accent-purple: #8b5cf6;
+    --accent-pink: #ec4899;
+    
+    --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
+    --gradient-glow: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+    --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: radial-gradient(circle at top right, #1e1b4b 0%, #0b0f19 60%, #030712 100%);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6, .brand-font {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+}
+
+/* Glassmorphism general container */
+.glass-panel {
+    background: var(--card-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    box-shadow: var(--card-shadow);
+}
+
+/* Custom Navbar */
+.navbar-custom {
+    background: rgba(11, 15, 25, 0.8) !important;
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.navbar-brand-gradient {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 1.5rem;
+    font-weight: 800;
+}
+
+/* Custom buttons */
+.btn-gradient-primary {
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    font-weight: 600;
+    padding: 10px 24px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+}
+
+.btn-gradient-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
+    color: white;
+    filter: brightness(1.1);
+}
+
+.btn-outline-custom {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.03);
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-custom:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.4);
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* Dashboard Sidebar & stats */
+.sidebar-panel {
+    border-right: 1px solid var(--border-color);
+    min-height: calc(100vh - 56px);
+}
+
+.stat-card {
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(139, 92, 246, 0.4) !important;
+}
+
+.stat-icon {
+    font-size: 2.2rem;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Voter ballot candidate card */
+.candidate-card {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
+}
+
+.candidate-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent-blue);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.25);
+}
+
+.candidate-card.selected {
+    border: 2px solid var(--accent-purple) !important;
+    background: rgba(139, 92, 246, 0.08) !important;
+}
+
+/* Inputs and Forms */
+.form-control-custom {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
+    transition: all 0.3s ease;
+}
+
+.form-control-custom:focus {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: var(--accent-blue) !important;
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.25) !important;
+}
+
+/* Hero Section */
+.hero-gradient-text {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800;
+}
+
+/* Custom list items and tables */
+.table-custom {
+    color: var(--text-primary) !important;
+    background-color: transparent !important;
+    --bs-table-bg: transparent !important;
+    --bs-table-color: var(--text-primary) !important;
+}
+
+.table-custom th {
+    background-color: transparent !important;
+    border-bottom: 2px solid var(--border-color) !important;
+    color: var(--text-secondary) !important;
+    --bs-table-bg: transparent !important;
+}
+
+.table-custom td {
+    background-color: transparent !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    --bs-table-bg: transparent !important;
+}
+
+/* Progress bar customizations */
+.progress-custom {
+    height: 10px;
+    border-radius: 5px;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.progress-bar-custom {
+    background: var(--gradient-primary);
+    border-radius: 5px;
+}
+
+/* Footer style */
+.footer-text {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+/* Premium landing page styling overrides and additions */
+.hero-glow-blob {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, rgba(59, 130, 246, 0.05) 70%, transparent 100%);
+    border-radius: 50%;
+    z-index: -1;
+    filter: blur(40px);
+}
+
+.animated-float {
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+
+.glow-card {
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.glow-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(236, 72, 153, 0.1) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 0;
+}
+
+.glow-card:hover::before {
+    opacity: 1;
+}
+
+.glow-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(139, 92, 246, 0.2);
+    border-color: rgba(139, 92, 246, 0.3) !important;
+}
+
+/* Process Roadmap */
+.timeline-track {
+    position: relative;
+}
+
+.timeline-track::after {
+    content: '';
+    position: absolute;
+    top: 30px;
+    left: 10%;
+    width: 80%;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent-blue) 0%, var(--accent-purple) 50%, var(--accent-pink) 100%);
+    opacity: 0.25;
+    z-index: 0;
+}
+
+@media (max-width: 768px) {
+    .timeline-track::after {
+        display: none;
+    }
+}
+
+.timeline-node {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--bg-secondary);
+    border: 2px solid var(--accent-purple);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px auto;
+    font-size: 1.5rem;
+    color: white;
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);
+    position: relative;
+    z-index: 1;
+    transition: all 0.3s ease;
+}
+
+.timeline-node:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 25px rgba(139, 92, 246, 0.5);
+    background: var(--gradient-primary);
+    border-color: transparent;
+}
+
+/* Mock Ballot component on home page */
+.mock-ballot {
+    background: rgba(17, 24, 39, 0.85);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 10px;
+    transition: all 0.3s ease;
+}
+
+.mock-ballot.active {
+    border-color: var(--accent-blue);
+    background: rgba(59, 130, 246, 0.05);
+}
+
+/* Custom Accordion override for FAQs */
+.accordion-custom .accordion-item {
+    background: rgba(17, 24, 39, 0.6) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 12px !important;
+    margin-bottom: 12px;
+    overflow: hidden;
+    backdrop-filter: blur(8px);
+}
+
+.accordion-custom .accordion-button {
+    background: transparent !important;
+    color: white !important;
+    font-weight: 600;
+    box-shadow: none !important;
+    border: 0 !important;
+}
+
+.accordion-custom .accordion-button:not(.collapsed) {
+    background: rgba(255, 255, 255, 0.02) !important;
+    color: var(--accent-blue) !important;
+}
+
+.accordion-custom .accordion-body {
+    color: var(--text-secondary);
+    background: rgba(0, 0, 0, 0.2);
+}
+

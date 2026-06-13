@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Secure Online Voting System{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- FontAwesome for Premium Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Custom Style CSS -->
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- Main Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom py-3">
+        <div class="container">
+            <a class="navbar-brand brand-font d-flex align-items-center" href="{{ url_for('home') }}">
+                <i class="fa-solid fa-check-to-slot text-primary me-2 fs-4"></i>
+                <span class="navbar-brand-gradient">VOTEFLOW</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item">
+                        <a class="nav-link px-3" href="{{ url_for('home') }}">Home</a>
+                    </li>
+                    {% if session.get('role') == 'admin' %}
+                        <li class="nav-item">
+                            <a class="nav-link px-3" href="{{ url_for('admin.dashboard') }}">Admin Dashboard</a>
+                        </li>
+                        <li class="nav-item ms-2">
+                            <a class="btn btn-outline-custom text-white" href="{{ url_for('auth.logout') }}">
+                                <i class="fa-solid fa-right-from-bracket me-1"></i> Logout (Admin)
+                            </a>
+                        </li>
+                    {% elif session.get('role') == 'voter' %}
+                        <li class="nav-item">
+                            <a class="nav-link px-3" href="{{ url_for('voting.dashboard') }}">Voter Portal</a>
+                        </li>
+                        <li class="nav-item ms-3 text-secondary d-none d-lg-block">
+                            <i class="fa-solid fa-user me-1 text-info"></i> Hi, {{ session.get('name') }}
+                        </li>
+                        <li class="nav-item ms-2">
+                            <a class="btn btn-outline-custom text-white" href="{{ url_for('auth.logout') }}">
+                                <i class="fa-solid fa-right-from-bracket me-1"></i> Logout
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link px-3" href="{{ url_for('auth.login') }}">Login</a>
+                        </li>
+                        <li class="nav-item ms-2">
+                            <a class="btn btn-gradient-primary" href="{{ url_for('auth.register') }}">
+                                <i class="fa-solid fa-user-plus me-1"></i> Register to Vote
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Content & Alerts Area -->
+    <div class="container my-5">
+        <!-- Flash messages system -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="row justify-content-center">
+                    <div class="col-md-10">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show glass-panel text-white border-0 py-3 mb-4 shadow" role="alert">
+                                <div class="d-flex align-items-center">
+                                    {% if category == 'success' %}
+                                        <i class="fa-solid fa-circle-check text-success fs-4 me-3"></i>
+                                    {% elif category == 'danger' %}
+                                        <i class="fa-solid fa-circle-exclamation text-danger fs-4 me-3"></i>
+                                    {% else %}
+                                        <i class="fa-solid fa-circle-info text-info fs-4 me-3"></i>
+                                    {% endif %}
+                                    <div>{{ message }}</div>
+                                </div>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Main Page Content Block -->
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Global Footer -->
+    <footer class="footer py-4 mt-auto border-top border-secondary border-opacity-25 bg-dark bg-opacity-20">
+        <div class="container text-center">
+            <p class="footer-text mb-0">&copy; 2026 VoteFlow Secure Cryptographic Voting Portal. All rights reserved.</p>
+            <small class="text-secondary text-opacity-50">Powered by Flask & MongoDB</small>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

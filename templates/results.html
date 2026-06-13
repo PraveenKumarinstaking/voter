@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Results - {{ election.title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+    <div class="col-lg-10 col-xl-8">
+        <div class="glass-panel p-4 p-md-5 border border-secondary border-opacity-25 shadow">
+            
+            <!-- Header -->
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+                <div class="d-flex align-items-center mb-3 mb-sm-0">
+                    <a href="{{ url_for('admin.dashboard' if session.get('role') == 'admin' else 'voting.dashboard') }}" class="btn btn-outline-custom text-white me-3">
+                        <i class="fa-solid fa-arrow-left"></i> Back
+                    </a>
+                    <div>
+                        <h3 class="text-white mb-1">{{ election.title }}</h3>
+                        {% if election.status == 'active' %}
+                            <span class="badge bg-success animated-pulse"><i class="fa-solid fa-square-poll-vertical me-1"></i> Live Tallying</span>
+                        {% elif election.status == 'upcoming' %}
+                            <span class="badge bg-secondary">Upcoming</span>
+                        {% else %}
+                            <span class="badge bg-dark border border-secondary">Polls Closed</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="text-sm-end">
+                    <h5 class="text-secondary small text-uppercase mb-1">Total Ballots Cast</h5>
+                    <h2 class="text-white font-weight-bold mb-0">{{ total_votes }}</h2>
+                </div>
+            </div>
+
+            <hr class="border-secondary border-opacity-25 mb-4">
+
+            <!-- Chart / Progress Bars Section -->
+            <h5 class="text-white mb-4"><i class="fa-solid fa-chart-simple text-primary me-2"></i>Tally breakdown</h5>
+            
+            {% if results %}
+                <div class="mb-5">
+                    {% for result in results %}
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-white fw-bold">
+                                    {{ result.candidate_name }}
+                                    <span class="badge bg-info text-dark ms-2 fw-normal" style="font-size: 0.75rem;">{{ result.party }}</span>
+                                </span>
+                                <span class="text-secondary">
+                                    <strong class="text-white">{{ result.votes }}</strong> votes ({{ result.percentage }}%)
+                                </span>
+                            </div>
+                            <!-- Bootstrap Progress Bar -->
+                            <div class="progress progress-custom" style="height: 12px;">
+                                <div class="progress-bar progress-bar-custom" role="progressbar" 
+                                     data-percentage="{{ result.percentage }}" 
+                                     aria-valuenow="{{ result.percentage }}" aria-valuemin="0" aria-valuemax="100">
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Table Breakdown -->
+                <div class="table-responsive mt-5">
+                    <table class="table table-custom align-middle">
+                        <thead>
+                            <tr>
+                                <th>Candidate Name</th>
+                                <th>Party</th>
+                                <th class="text-end">Votes</th>
+                                <th class="text-end">Percentage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in results %}
+                                <tr>
+                                    <td class="text-white fw-bold">{{ result.candidate_name }}</td>
+                                    <td><span class="badge bg-dark text-secondary border border-secondary border-opacity-20">{{ result.party }}</span></td>
+                                    <td class="text-end text-white">{{ result.votes }}</td>
+                                    <td class="text-end text-info fw-bold">{{ result.percentage }}%</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fa-solid fa-box-archive text-secondary fs-1 mb-3"></i>
+                    <p class="text-secondary">No candidates are registered or no votes have been cast yet.</p>
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll('.progress-bar').forEach(function(bar) {
+            const pct = bar.getAttribute('data-percentage');
+            if (pct) {
+                bar.style.width = pct + '%';
+            }
+        });
+    });
+</script>
+{% endblock %}

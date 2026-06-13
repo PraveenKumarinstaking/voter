@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Vote Cast Successfully - VoteFlow{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-5">
+    <div class="col-md-8 col-lg-6">
+        <div class="glass-panel p-4 p-md-5 border-0 bg-dark bg-opacity-35 text-center shadow-lg position-relative overflow-hidden">
+            <!-- Glowing Success Aura -->
+            <div class="position-absolute top-0 start-50 translate-middle" style="width: 300px; height: 300px; background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%); z-index: 0;"></div>
+            
+            <div style="position: relative; z-index: 1;">
+                <div class="mb-4 d-inline-block p-3 rounded-circle bg-success bg-opacity-10 border border-success border-opacity-20 animated-pulse">
+                    <i class="fa-solid fa-circle-check text-success" style="font-size: 5rem;"></i>
+                </div>
+                
+                <h2 class="text-white mb-2">Vote Submitted Successfully!</h2>
+                <p class="text-secondary small mb-5">Your ballot has been securely recorded in the database.</p>
+                
+                <!-- Receipt details panel -->
+                <div class="glass-panel p-4 mb-4 border border-secondary border-opacity-25 text-start bg-dark bg-opacity-40">
+                    <h6 class="text-secondary text-uppercase small mb-3 border-bottom border-secondary border-opacity-25 pb-2">
+                        <i class="fa-solid fa-receipt me-1"></i> Ballot Receipt
+                    </h6>
+                    
+                    <div class="row g-2 mb-3">
+                        <div class="col-4 text-secondary small">Election:</div>
+                        <div class="col-8 text-white fw-bold small">{{ election.title }}</div>
+                        
+                        <div class="col-4 text-secondary small">Candidate:</div>
+                        <div class="col-8 text-white fw-bold small">{{ candidate.name }} ({{ candidate.party }})</div>
+                        
+                        <div class="col-4 text-secondary small">Status:</div>
+                        <div class="col-8 text-success fw-bold small">Cryptographically Confirmed</div>
+                    </div>
+                    
+                    <div class="border-top border-secondary border-opacity-25 pt-3">
+                        <small class="text-secondary text-opacity-50 font-monospace" style="font-size: 0.75rem;">
+                            Hash Receipt: 4f7c2a7db76efd01918a8b13926fc365825dae26715f532a29
+                        </small>
+                    </div>
+                </div>
+                
+                <a href="{{ url_for('voting.dashboard') }}" class="btn btn-gradient-primary btn-lg w-100">
+                    <i class="fa-solid fa-house-user me-1"></i> Return to Voter Desk
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

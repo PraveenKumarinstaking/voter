@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Voter Portal - VoteFlow{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2 class="text-white">
+            <i class="fa-solid fa-person-booth text-primary me-2"></i> Voter Voting Desk
+        </h2>
+        <p class="text-secondary">Welcome back, <strong class="text-white">{{ session.get('name') }}</strong> (Voter ID: <code>{{ session.get('voter_id') }}</code>). Cast your ballot and view results below.</p>
+    </div>
+    <div class="col-md-4 text-md-end align-self-center">
+        <span class="badge bg-success border border-success border-opacity-25 py-2 px-3">
+            <i class="fa-solid fa-circle-check me-1"></i> Authorized to Vote
+        </span>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-12">
+        <div class="glass-panel p-4">
+            <h4 class="text-white mb-4 border-bottom border-secondary border-opacity-25 pb-3">
+                <i class="fa-solid fa-square-poll-horizontal text-info me-2"></i> Electoral Events
+            </h4>
+            
+            {% if elections %}
+                <div class="row g-4">
+                    {% for election in elections %}
+                        <div class="col-md-6 col-lg-4">
+                            <div class="glass-panel p-4 h-100 border border-secondary border-opacity-25 d-flex flex-column justify-content-between position-relative">
+                                
+                                <div>
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <h5 class="text-white mb-0 fw-bold">{{ election.title }}</h5>
+                                        {% if election.status == 'active' %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% elif election.status == 'upcoming' %}
+                                            <span class="badge bg-secondary">Upcoming</span>
+                                        {% else %}
+                                            <span class="badge bg-dark border border-secondary">Completed</span>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <p class="text-secondary small mb-4">
+                                        {{ election.description | truncate(100) }}
+                                    </p>
+                                </div>
+                                
+                                <div>
+                                    <hr class="border-secondary border-opacity-25">
+                                    <div class="d-grid">
+                                        {% if election.status == 'active' %}
+                                            {% if election.has_voted %}
+                                                <button class="btn btn-outline-secondary btn-sm" disabled>
+                                                    <i class="fa-solid fa-check-double me-1"></i> Vote Submitted
+                                                </button>
+                                            {% else %}
+                                                <a href="{{ url_for('voting.ballot', election_id=election.id_str) }}" class="btn btn-gradient-primary btn-sm">
+                                                    <i class="fa-solid fa-check-to-slot me-1"></i> Open Ballot Paper
+                                                </a>
+                                            {% endif %}
+                                        {% elif election.status == 'upcoming' %}
+                                            <button class="btn btn-outline-custom btn-sm text-secondary" disabled>
+                                                <i class="fa-solid fa-clock me-1"></i> Opening Soon
+                                            </button>
+                                        {% else %}
+                                            <!-- Completed -->
+                                            {% if election.is_results_published %}
+                                                <a href="{{ url_for('voting.view_election_results', election_id=election.id_str) }}" class="btn btn-outline-info btn-sm">
+                                                    <i class="fa-solid fa-chart-bar me-1"></i> View Results
+                                                </a>
+                                            {% else %}
+                                                <button class="btn btn-outline-secondary btn-sm" disabled>
+                                                    <i class="fa-solid fa-hourglass-half me-1"></i> Results Pending
+                                                </button>
+                                            {% endif %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fa-solid fa-box-open text-secondary fs-1 mb-3"></i>
+                    <p class="text-secondary">No elections are configured at this time. Please check back later.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

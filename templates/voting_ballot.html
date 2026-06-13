@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Cast Ballot - {{ election.title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+    <div class="col-lg-10 col-xl-8">
+        <div class="glass-panel p-4 p-md-5 border border-secondary border-opacity-25 shadow">
+            
+            <!-- Header -->
+            <div class="d-flex align-items-center mb-4">
+                <a href="{{ url_for('voting.dashboard') }}" class="btn btn-outline-custom text-white me-3">
+                    <i class="fa-solid fa-arrow-left"></i> Back
+                </a>
+                <div>
+                    <h3 class="text-white mb-1">{{ election.title }}</h3>
+                    <span class="badge bg-success"><i class="fa-solid fa-lock me-1"></i> Secure Session Active</span>
+                </div>
+            </div>
+            
+            <p class="text-secondary mb-4">{{ election.description }}</p>
+            
+            <hr class="border-secondary border-opacity-25 mb-4">
+            
+            <h5 class="text-white mb-3"><i class="fa-solid fa-list-check text-primary me-2"></i>Select Candidate</h5>
+            
+            <form action="{{ url_for('voting.cast_vote', election_id=election.id_str) }}" method="POST" id="ballotForm" onsubmit="return confirmVote()">
+                <div class="row g-3 mb-4">
+                    {% if candidates %}
+                        {% for candidate in candidates %}
+                            <div class="col-md-6">
+                                <!-- Selectable Candidate Card -->
+                                <div class="glass-panel p-4 h-100 candidate-card" id="card-{{ candidate.id_str }}" onclick="selectCandidate('{{ candidate.id_str }}')">
+                                    <div class="d-flex align-items-start justify-content-between mb-2">
+                                        <div>
+                                            <h5 class="text-white mb-1 fw-bold">{{ candidate.name }}</h5>
+                                            <span class="badge bg-info text-dark fw-bold">{{ candidate.party }}</span>
+                                        </div>
+                                        
+                                        <!-- Hidden Input / Visual indicator -->
+                                        <div class="form-check">
+                                            <input class="form-check-input bg-dark border-secondary" type="radio" name="candidate_id" id="radio-{{ candidate.id_str }}" value="{{ candidate.id_str }}" required style="display: none;">
+                                            <div class="candidate-radio-indicator border rounded-circle d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; border-color: rgba(255,255,255,0.2) !important;">
+                                                <i class="fa-solid fa-circle text-purple d-none" id="check-{{ candidate.id_str }}" style="font-size: 10px; color: #8b5cf6;"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="text-secondary small mb-0 mt-3">
+                                        {{ candidate.bio }}
+                                    </p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="col-12 text-center py-4">
+                            <p class="text-secondary">No candidates are registered for this election yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                {% if candidates %}
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-gradient-primary btn-lg" id="submitVoteBtn" disabled>
+                            <i class="fa-solid fa-check-to-slot me-1"></i> Cast My Official Ballot
+                        </button>
+                    </div>
+                {% endif %}
+            </form>
+            
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let selectedCandidateId = null;
+
+    function selectCandidate(candidateId) {
+        // Unselect previous
+        if (selectedCandidateId) {
+            const oldCard = document.getElementById('card-' + selectedCandidateId);
+            const oldCheck = document.getElementById('check-' + selectedCandidateId);
+            if (oldCard) oldCard.classList.remove('selected');
+            if (oldCheck) oldCheck.classList.add('d-none');
+        }
+
+        // Select new
+        selectedCandidateId = candidateId;
+        const newCard = document.getElementById('card-' + candidateId);
+        const newRadio = document.getElementById('radio-' + candidateId);
+        const newCheck = document.getElementById('check-' + candidateId);
+        
+        if (newCard) newCard.classList.add('selected');
+        if (newRadio) newRadio.checked = true;
+        if (newCheck) newCheck.classList.remove('d-none');
+
+        // Enable Submit Button
+        document.getElementById('submitVoteBtn').removeAttribute('disabled');
+    }
+
+    function confirmVote() {
+        if (!selectedCandidateId) {
+            alert("Please select a candidate before submitting.");
+            return false;
+        }
+        
+        const cardName = document.querySelector('#card-' + selectedCandidateId + ' h5').textContent;
+        return confirm(`Are you sure you want to cast your vote for "${cardName}"? This action CANNOT be undone.`);
+    }
+</script>
+{% endblock %}
